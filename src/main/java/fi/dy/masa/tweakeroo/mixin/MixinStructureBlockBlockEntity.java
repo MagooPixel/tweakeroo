@@ -84,9 +84,8 @@ public abstract class MixinStructureBlockBlockEntity extends BlockEntity
 
                     for (BlockEntity te : list)
                     {
-                        if (te instanceof StructureBlockBlockEntity)
+                        if (te instanceof StructureBlockBlockEntity tes)
                         {
-                            StructureBlockBlockEntity tes = (StructureBlockBlockEntity) te;
                             BlockPos p = te.getPos();
 
                             if (tes.getMode() == StructureBlockMode.CORNER &&

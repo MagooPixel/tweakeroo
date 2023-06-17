@@ -61,7 +61,7 @@ public class PlacementTweaks
     private static Direction sideFirstBreaking = null;
     private static Direction sideRotatedFirst = null;
     private static float playerYawFirst;
-    private static ItemStack[] stackBeforeUse = new ItemStack[] { ItemStack.EMPTY, ItemStack.EMPTY };
+    private static final ItemStack[] stackBeforeUse = new ItemStack[] { ItemStack.EMPTY, ItemStack.EMPTY };
     private static boolean isFirstClick;
     private static boolean isEmulatedClick;
     private static boolean firstWasRotation;
@@ -99,20 +99,20 @@ public class PlacementTweaks
             stackBeforeUse[1] = ItemStack.EMPTY;
         }
 
-        if (use == false)
+        if (!use)
         {
             clearClickedBlockInfoUse();
 
             // Clear the cached stack when releasing both keys, so that the restock doesn't happen when
             // using another item or an empty hand.
-            if (attack == false)
+            if (!attack)
             {
                 stackBeforeUse[0] = ItemStack.EMPTY;
                 stackBeforeUse[1] = ItemStack.EMPTY;
             }
         }
 
-        if (attack == false)
+        if (!attack)
         {
             clearClickedBlockInfoAttack();
         }
@@ -125,18 +125,18 @@ public class PlacementTweaks
         ItemStack stackOriginal = player.getStackInHand(hand);
 
         if (FeatureToggle.TWEAK_HAND_RESTOCK.getBooleanValue() &&
-            stackOriginal.isEmpty() == false &&
+                !stackOriginal.isEmpty() &&
             canUseItemWithRestriction(HAND_RESTOCK_RESTRICTION, stackOriginal))
         {
-            if (isEmulatedClick == false)
+            if (!isEmulatedClick)
             {
                 //System.out.printf("onProcessRightClickPre storing stack: %s\n", stackOriginal);
                 cacheStackInHand(hand);
             }
 
             // Don't allow taking stacks from elsewhere in the hotbar, if the cycle tweak is on
-            boolean allowHotbar = FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() == false &&
-                                  FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue() == false;
+            boolean allowHotbar = !FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() &&
+                    !FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue();
             InventoryUtils.preRestockHand(player, hand, allowHotbar);
         }
 
@@ -176,7 +176,7 @@ public class PlacementTweaks
         ItemStack stackOriginal = player.getStackInHand(hand);
 
         if (FeatureToggle.TWEAK_HAND_RESTOCK.getBooleanValue() &&
-            stackOriginal.isEmpty() == false &&
+                !stackOriginal.isEmpty() &&
             canUseItemWithRestriction(HAND_RESTOCK_RESTRICTION, stackOriginal))
         {
             stackBeforeUse[hand.ordinal()] = stackOriginal.copy();
@@ -189,7 +189,7 @@ public class PlacementTweaks
         if (FeatureToggle.TWEAK_FAST_LEFT_CLICK.getBooleanValue())
         {
             if (mc.player.getAbilities().creativeMode ||
-                (Configs.Generic.FAST_LEFT_CLICK_ALLOW_TOOLS.getBooleanValue() || (mc.player.getMainHandStack().getItem() instanceof MiningToolItem) == false))
+                (Configs.Generic.FAST_LEFT_CLICK_ALLOW_TOOLS.getBooleanValue() || !(mc.player.getMainHandStack().getItem() instanceof MiningToolItem)))
             {
                 final int count = Configs.Generic.FAST_LEFT_CLICK_COUNT.getIntegerValue();
 
@@ -249,7 +249,7 @@ public class PlacementTweaks
                 ctx = new ItemPlacementContext(new ItemUsageContext(player, hand, hitResult));
 
                 if (hand != null &&
-                    posNew.equals(posLast) == false &&
+                        !posNew.equals(posLast) &&
                     canPlaceBlockIntoPosition(world, posNew, ctx) &&
                     isPositionAllowedByPlacementRestriction(posNew, side) &&
                     canPlaceBlockAgainst(world, pos, player, hand)
@@ -354,7 +354,7 @@ public class PlacementTweaks
             stateClickedOn = state;
         }
 
-        if (canPlaceBlockAgainst(world, posIn, player, hand) == false)
+        if (!canPlaceBlockAgainst(world, posIn, player, hand))
         {
             return ActionResult.PASS;
         }
@@ -451,7 +451,7 @@ public class PlacementTweaks
 
         boolean simpleOffset = false;
 
-        if (handleFlexible == false &&
+        if (!handleFlexible &&
             FeatureToggle.TWEAK_FAKE_SNEAK_PLACEMENT.getBooleanValue() &&
             stack.getItem() instanceof BlockItem)
         {
@@ -473,7 +473,7 @@ public class PlacementTweaks
 
             if (posNew == null)
             {
-                if (flexible == false || isFirstClick == false)
+                if (!flexible || !isFirstClick)
                 {
                     posNew = posIn;
                 }
@@ -493,15 +493,15 @@ public class PlacementTweaks
 
                 // Pistons, Droppers, Dispensers should face into the block, but Observers should point their back/output
                 // side into the block when the Accurate Placement In hotkey is used
-                if ((stack.getItem() instanceof BlockItem) == false || ((BlockItem) stack.getItem()).getBlock() != Blocks.OBSERVER)
+                if (!(stack.getItem() instanceof BlockItem) || ((BlockItem) stack.getItem()).getBlock() != Blocks.OBSERVER)
                 {
                     facing = facing.getOpposite();
                 }
                 //System.out.printf("accurate - IN - facing: %s\n", facing);
             }
-            else if (flexible == false || rotation == false)
+            else if (!flexible || !rotation)
             {
-                if (stack.getItem() instanceof BlockItem)
+                if (stack.getItem() instanceof BlockItem item)
                 {
 
                     BlockHitResult hitResult = new BlockHitResult(hitVec, sideIn, posNew, false);
@@ -512,7 +512,6 @@ public class PlacementTweaks
                     hitResult = new BlockHitResult(hitVec, sideIn, posPlacement, false);
                     ctx = new ItemPlacementContext(new ItemUsageContext(player, hand, hitResult));
 
-                    BlockItem item = (BlockItem) stack.getItem();
                     BlockState state = item.getBlock().getPlacementState(ctx);
 
                     // getStateForPlacement can return null in 1.13+
@@ -538,7 +537,7 @@ public class PlacementTweaks
             if (accurateReverse)
             {
                 //System.out.printf("accurate - REVERSE - facingOrig: %s, facingNew: %s\n", facing, facing.getOpposite());
-                if (accurateIn || flexible == false || rotation == false)
+                if (accurateIn || !flexible || !rotation)
                 {
                     facing = facing.getOpposite();
                 }
@@ -590,7 +589,7 @@ public class PlacementTweaks
             }
         }
 
-        if (isFirstClick == false && Configs.Generic.FAST_PLACEMENT_REMEMBER_ALWAYS.getBooleanValue())
+        if (!isFirstClick && Configs.Generic.FAST_PLACEMENT_REMEMBER_ALWAYS.getBooleanValue())
         {
             return handleFlexibleBlockPlacement(controller, player, world, posIn, sideIn, playerYaw, hitVec, hand, null);
         }
@@ -604,11 +603,11 @@ public class PlacementTweaks
         {
             BlockState state = world.getBlockState(pos);
 
-            if (stackClickedOn.isEmpty() == false)
+            if (!stackClickedOn.isEmpty())
             {
                 ItemStack stack = state.getBlock().getPickStack(world, pos, state);
 
-                if (fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stackClickedOn, stack) == false)
+                if (!fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stackClickedOn, stack))
                 {
                     return false;
                 }
@@ -628,10 +627,7 @@ public class PlacementTweaks
             ItemStack stackClicked = state.getBlock().getPickStack(world, pos, state);
             ItemStack stackHand = player.getStackInHand(hand);
 
-            if (fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stackClicked, stackHand) == false)
-            {
-                return false;
-            }
+            return fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stackClicked, stackHand);
         }
 
         return true;
@@ -656,7 +652,7 @@ public class PlacementTweaks
 
     private static boolean canUseFastRightClick(PlayerEntity player)
     {
-        if (canUseItemWithRestriction(FAST_RIGHT_CLICK_ITEM_RESTRICTION, player) == false)
+        if (!canUseItemWithRestriction(FAST_RIGHT_CLICK_ITEM_RESTRICTION, player))
         {
             return false;
         }
@@ -680,12 +676,12 @@ public class PlacementTweaks
         {
             ItemStack stackCurrent = player.getStackInHand(hand);
 
-            if (stackOriginal.isEmpty() == false && player.getInventory().selectedSlot == hotbarSlot &&
-                (stackCurrent.isEmpty() || stackCurrent.isItemEqual(stackOriginal) == false))
+            if (!stackOriginal.isEmpty() && player.getInventory().selectedSlot == hotbarSlot &&
+                (stackCurrent.isEmpty() || !ItemStack.areItemsEqual(stackCurrent, stackOriginal)))
             {
                 // Don't allow taking stacks from elsewhere in the hotbar, if the cycle tweak is on
-                boolean allowHotbar = FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() == false &&
-                                      FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue() == false;
+                boolean allowHotbar = !FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() &&
+                        !FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue();
                 InventoryUtils.restockNewStackToHand(player, hand, stackOriginal, allowHotbar);
             }
         }
@@ -708,8 +704,8 @@ public class PlacementTweaks
         }
 
         // Don't allow taking stacks from elsewhere in the hotbar, if the cycle tweak is on
-        boolean allowHotbar = FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() == false &&
-                              FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue() == false;
+        boolean allowHotbar = !FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() &&
+                !FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue();
 
         InventoryUtils.preRestockHand(player, hand, allowHotbar);
 
@@ -722,9 +718,9 @@ public class PlacementTweaks
         BlockState state = world.getBlockState(posIn);
         ItemStack stackOriginal;
 
-        if (stackBeforeUse[hand.ordinal()].isEmpty() == false &&
-            FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() == false &&
-            FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue() == false)
+        if (!stackBeforeUse[hand.ordinal()].isEmpty() &&
+                !FeatureToggle.TWEAK_HOTBAR_SLOT_CYCLE.getBooleanValue() &&
+                !FeatureToggle.TWEAK_HOTBAR_SLOT_RANDOMIZER.getBooleanValue())
         {
             stackOriginal = stackBeforeUse[hand.ordinal()];
         }
@@ -734,7 +730,7 @@ public class PlacementTweaks
         }
 
         if (FeatureToggle.TWEAK_PLACEMENT_RESTRICTION.getBooleanValue() &&
-            state.canReplace(ctx) == false && state.getMaterial().isReplaceable())
+                !state.canReplace(ctx) && state.isReplaceable())
         {
             // If the block itself says it's not replaceable, but the material is (fluids),
             // then we need to offset the position back, otherwise the check in ItemBlock
@@ -743,7 +739,7 @@ public class PlacementTweaks
             posIn = posIn.offset(sideIn.getOpposite());
         }
 
-        if (posFirst != null && isPositionAllowedByPlacementRestriction(posIn, sideIn) == false)
+        if (posFirst != null && !isPositionAllowedByPlacementRestriction(posIn, sideIn))
         {
             //System.out.printf("processRightClickBlockWrapper() PASS @ %s, side: %s\n", pos, side);
             return ActionResult.PASS;
@@ -761,7 +757,7 @@ public class PlacementTweaks
         accurate = accurate && keys;
 
         // Carpet-Extra mod accurate block placement protocol support
-        if (flexible && rotation && accurate == false &&
+        if (flexible && rotation && !accurate &&
             Configs.Generic.CARPET_ACCURATE_PLACEMENT_PROTOCOL.getBooleanValue() &&
             isFacingValidFor(facing, stackOriginal))
         {
@@ -823,7 +819,7 @@ public class PlacementTweaks
         tryRestockHand(player, hand, stackOriginal);
 
         if (FeatureToggle.TWEAK_AFTER_CLICKER.getBooleanValue() &&
-            Configs.Generic.CARPET_ACCURATE_PLACEMENT_PROTOCOL.getBooleanValue() == false &&
+                !Configs.Generic.CARPET_ACCURATE_PLACEMENT_PROTOCOL.getBooleanValue() &&
             world.getBlockState(posPlacement) != stateBefore)
         {
             for (int i = 0; i < afterClickerClickCount; i++)
@@ -954,7 +950,7 @@ public class PlacementTweaks
         boolean restrictionEnabled = FeatureToggle.TWEAK_PLACEMENT_RESTRICTION.getBooleanValue();
         boolean gridEnabled = FeatureToggle.TWEAK_PLACEMENT_GRID.getBooleanValue();
 
-        if (restrictionEnabled == false && gridEnabled == false)
+        if (!restrictionEnabled && !gridEnabled)
         {
             return true;
         }
@@ -974,7 +970,7 @@ public class PlacementTweaks
         {
             BlockState state = world.getBlockState(pos);
 
-            if (BLOCK_TYPE_BREAK_RESTRICTION.isAllowed(state.getBlock()) == false)
+            if (!BLOCK_TYPE_BREAK_RESTRICTION.isAllowed(state.getBlock()))
             {
                 MessageOutputType type = (MessageOutputType) Configs.Generic.BLOCK_TYPE_BREAK_RESTRICTION_WARN.getOptionListValue();
 
@@ -994,7 +990,7 @@ public class PlacementTweaks
         boolean restrictionEnabled = FeatureToggle.TWEAK_BREAKING_RESTRICTION.getBooleanValue();
         boolean gridEnabled = FeatureToggle.TWEAK_BREAKING_GRID.getBooleanValue();
 
-        if (restrictionEnabled == false && gridEnabled == false)
+        if (!restrictionEnabled && !gridEnabled)
         {
             return true;
         }
@@ -1041,7 +1037,7 @@ public class PlacementTweaks
     {
         Item item = stack.getItem();
 
-        if (stack.isEmpty() == false && item instanceof BlockItem)
+        if (!stack.isEmpty() && item instanceof BlockItem)
         {
             Block block = ((BlockItem) item).getBlock();
             BlockState state = block.getDefaultState();
@@ -1071,7 +1067,7 @@ public class PlacementTweaks
     private static boolean canPlaceBlockIntoPosition(World world, BlockPos pos, ItemPlacementContext useContext)
     {
         BlockState state = world.getBlockState(pos);
-        return state.canReplace(useContext) || state.getMaterial().isLiquid() || state.getMaterial().isReplaceable();
+        return state.canReplace(useContext) || state.isLiquid() || state.isReplaceable();
     }
 
     private static boolean isNewPositionValidForColumnMode(BlockPos posNew, BlockPos posFirst, Direction sideFirst)
@@ -1209,7 +1205,7 @@ public class PlacementTweaks
         ScreenHandler container = player != null ? player.currentScreenHandler : null;
 
         if (Configs.Generic.SLOT_SYNC_WORKAROUND.getBooleanValue() &&
-            FeatureToggle.TWEAK_PICK_BEFORE_PLACE.getBooleanValue() == false &&
+                !FeatureToggle.TWEAK_PICK_BEFORE_PLACE.getBooleanValue() &&
             container != null && container == player.playerScreenHandler &&
             (slotNumber == 45 || (slotNumber - 36) == player.getInventory().selectedSlot))
         {
@@ -1221,11 +1217,8 @@ public class PlacementTweaks
                 return true;
             }
 
-            if (mc.options.attackKey.isPressed() &&
-                FeatureToggle.TWEAK_FAST_LEFT_CLICK.getBooleanValue())
-            {
-                return true;
-            }
+            return mc.options.attackKey.isPressed() &&
+                    FeatureToggle.TWEAK_FAST_LEFT_CLICK.getBooleanValue();
         }
 
         return false;

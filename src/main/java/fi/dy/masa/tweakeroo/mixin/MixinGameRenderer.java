@@ -28,7 +28,7 @@ import fi.dy.masa.tweakeroo.util.MiscUtils;
 @Mixin(value = GameRenderer.class, priority = 1001)
 public abstract class MixinGameRenderer
 {
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final MinecraftClient client;
 
     @Shadow protected abstract void bobView(MatrixStack matrices, float tickDelta);
 
@@ -48,7 +48,7 @@ public abstract class MixinGameRenderer
               target = "Lnet/minecraft/client/render/GameRenderer;bobView(Lnet/minecraft/client/util/math/MatrixStack;F)V"))
     private void disableWorldViewBob(GameRenderer renderer, MatrixStack matrices, float tickDelta)
     {
-        if (Configs.Disable.DISABLE_WORLD_VIEW_BOB.getBooleanValue() == false)
+        if (!Configs.Disable.DISABLE_WORLD_VIEW_BOB.getBooleanValue())
         {
             this.bobView(matrices, tickDelta);
         }
@@ -98,13 +98,13 @@ public abstract class MixinGameRenderer
     {
         if (Configs.Disable.DISABLE_DEAD_MOB_TARGETING.getBooleanValue())
         {
-            predicate = predicate.and((entityIn) -> (entityIn instanceof LivingEntity) == false || ((LivingEntity) entityIn).getHealth() > 0f);
+            predicate = predicate.and((entityIn) -> !(entityIn instanceof LivingEntity) || ((LivingEntity) entityIn).getHealth() > 0f);
         }
 
         if ((FeatureToggle.TWEAK_HANGABLE_ENTITY_BYPASS.getBooleanValue() && this.client.player != null
              && this.client.player.isSneaking() == Configs.Generic.HANGABLE_ENTITY_BYPASS_INVERSE.getBooleanValue()))
         {
-            predicate = predicate.and((entityIn) -> (entityIn instanceof AbstractDecorationEntity) == false);
+            predicate = predicate.and((entityIn) -> !(entityIn instanceof AbstractDecorationEntity));
         }
 
         return predicate;

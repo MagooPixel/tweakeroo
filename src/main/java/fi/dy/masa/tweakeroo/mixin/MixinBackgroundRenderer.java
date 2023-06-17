@@ -112,7 +112,7 @@ public abstract class MixinBackgroundRenderer
     {
         if (Configs.Disable.DISABLE_RENDER_DISTANCE_FOG.getBooleanValue())
         {
-            if (thickFog == false && wasLava == false)
+            if (!thickFog && !wasLava)
             {
                 float distance = Math.max(512, MinecraftClient.getInstance().gameRenderer.getViewDistance());
                 RenderSystem.setShaderFogStart(distance * 1.6F);

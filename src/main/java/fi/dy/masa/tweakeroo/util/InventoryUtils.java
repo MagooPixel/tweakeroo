@@ -99,7 +99,7 @@ public class InventoryUtils
                     {
                         for (int slotNum = slotStart; slotNum <= slotEnd; ++slotNum)
                         {
-                            if (output.contains(slotNum) == false)
+                            if (!output.contains(slotNum))
                             {
                                 output.add(slotNum);
                             }
@@ -110,7 +110,7 @@ public class InventoryUtils
                 {
                     int slotNum = Integer.parseInt(str) - 1;
 
-                    if (PlayerInventory.isValidHotbarIndex(slotNum) && output.contains(slotNum) == false)
+                    if (PlayerInventory.isValidHotbarIndex(slotNum) && !output.contains(slotNum))
                     {
                         output.add(slotNum);
                     }
@@ -196,7 +196,7 @@ public class InventoryUtils
             String entities = split[0].trim();
             String items = split[1].trim();
             
-            if (items.equals("<ignore>") == false)
+            if (!items.equals("<ignore>"))
             {
                 for (String itemId : items.split(","))
                 {
@@ -337,7 +337,7 @@ public class InventoryUtils
 
         if (FeatureToggle.TWEAK_HAND_RESTOCK.getBooleanValue() &&
             Configs.Generic.HAND_RESTOCK_PRE.getBooleanValue() &&
-            stackHand.isEmpty() == false &&
+                !stackHand.isEmpty() &&
             stackHand.getCount() <= threshold && stackHand.getMaxCount() > threshold &&
             PlacementTweaks.canUseItemWithRestriction(PlacementTweaks.HAND_RESTOCK_RESTRICTION, stackHand) &&
             player.currentScreenHandler == player.playerScreenHandler &&
@@ -389,7 +389,7 @@ public class InventoryUtils
     {
         ItemStack stack = player.getStackInHand(hand);
 
-        if (stack.isEmpty() == false)
+        if (!stack.isEmpty())
         {
             int minDurability = getMinDurability(stack);
 
@@ -406,7 +406,7 @@ public class InventoryUtils
         PlayerEntity player = mc.player;
 
         if (player != null && mc.world != null &&
-            TOOL_SWITCH_IGNORED_SLOTS.contains(player.getInventory().selectedSlot) == false)
+                !TOOL_SWITCH_IGNORED_SLOTS.contains(player.getInventory().selectedSlot))
         {
             ScreenHandler container = player.playerScreenHandler;
             ItemPickerTest test;
@@ -432,7 +432,7 @@ public class InventoryUtils
 
     private static boolean isBetterWeapon(ItemStack testedStack, ItemStack previousWeapon, Entity entity)
     {
-        return testedStack.isEmpty() == false && matchesWeaponMapping(testedStack, entity) && (makesMoreDamage(testedStack, previousWeapon) || matchesWeaponMapping(previousWeapon, entity) == false);
+        return !testedStack.isEmpty() && matchesWeaponMapping(testedStack, entity) && (makesMoreDamage(testedStack, previousWeapon) || !matchesWeaponMapping(previousWeapon, entity));
     }
 
     private static boolean isBetterWeaponAndHasDurability(ItemStack testedStack, ItemStack previousTool, Entity entity)
@@ -473,7 +473,7 @@ public class InventoryUtils
         PlayerEntity player = mc.player;
 
         if (player != null && mc.world != null &&
-            TOOL_SWITCH_IGNORED_SLOTS.contains(player.getInventory().selectedSlot) == false)
+                !TOOL_SWITCH_IGNORED_SLOTS.contains(player.getInventory().selectedSlot))
         {
             BlockState state = mc.world.getBlockState(pos);
             ScreenHandler container = player.playerScreenHandler;
@@ -499,7 +499,7 @@ public class InventoryUtils
 
     private static boolean isBetterTool(ItemStack testedStack, ItemStack previousTool, BlockState state)
     {
-        return testedStack.isEmpty() == false && isMoreEffectiveTool(testedStack, previousTool, state);
+        return !testedStack.isEmpty() && isMoreEffectiveTool(testedStack, previousTool, state);
     }
 
     private static boolean isBetterToolAndHasDurability(ItemStack testedStack, ItemStack previousTool, BlockState state)
@@ -526,7 +526,7 @@ public class InventoryUtils
             }
         }
 
-        if (state.isToolRequired() && stack.isSuitableFor(state) == false)
+        if (state.isToolRequired() && !stack.isSuitableFor(state))
         {
             speed /= (100F / 30F);
         }
@@ -596,7 +596,7 @@ public class InventoryUtils
         for (int slotNumber : slotNumbers)
         {
             if (slotNumber >= 0 && slotNumber <= maxSlot &&
-                container.getSlot(slotNumber).hasStack() == false)
+                    !container.getSlot(slotNumber).hasStack())
             {
                 return slotNumber;
             }
@@ -617,7 +617,7 @@ public class InventoryUtils
 
     private static int getMinDurability(ItemStack stack)
     {
-        if (FeatureToggle.TWEAK_SWAP_ALMOST_BROKEN_TOOLS.getBooleanValue() == false)
+        if (!FeatureToggle.TWEAK_SWAP_ALMOST_BROKEN_TOOLS.getBooleanValue())
         {
             return 0;
         }
@@ -656,7 +656,7 @@ public class InventoryUtils
             return;
         }
 
-        slotWithItem = findSuitableSlot(container, (s) -> s.isDamageable() == false);
+        slotWithItem = findSuitableSlot(container, (s) -> !s.isDamageable());
 
         if (slotWithItem != -1)
         {
@@ -687,9 +687,9 @@ public class InventoryUtils
 
         ItemStack stack = player.getEquippedStack(type);
 
-        if (stack.isEmpty() == false &&
-            (stack.isDamageable() == false ||
-             stack.isDamaged() == false ||
+        if (!stack.isEmpty() &&
+            (!stack.isDamageable() ||
+                    !stack.isDamaged() ||
              EnchantmentHelper.getLevel(Enchantments.MENDING, stack) <= 0))
         {
             Slot slot = player.currentScreenHandler.getSlot(slotNum);
@@ -709,7 +709,7 @@ public class InventoryUtils
 
         for (Slot slot : containerPlayer.slots)
         {
-            if (slot.hasStack() && isConfiguredRepairSlot(slot.id, player) == false)
+            if (slot.hasStack() && !isConfiguredRepairSlot(slot.id, player))
             {
                 ItemStack stack = slot.getStack();
 
@@ -739,7 +739,7 @@ public class InventoryUtils
         Predicate<ItemStack> stackFilterChestPlate = (s) -> s.getItem() instanceof ArmorItem && ((ArmorItem) s.getItem()).getSlotType() == EquipmentSlot.CHEST;
         Predicate<ItemStack> stackFilterElytra = (s) -> s.getItem() instanceof ElytraItem && ElytraItem.isUsable(s);
         Predicate<ItemStack> stackFilter = (currentStack.isEmpty() || stackFilterChestPlate.test(currentStack)) ? stackFilterElytra : stackFilterChestPlate;
-        Predicate<ItemStack> finalFilter = (s) -> s.isEmpty() == false && stackFilter.test(s) && s.getDamage() < s.getMaxDamage() - 10;
+        Predicate<ItemStack> finalFilter = (s) -> !s.isEmpty() && stackFilter.test(s) && s.getDamage() < s.getMaxDamage() - 10;
         int targetSlot = findSuitableSlot(container, finalFilter);
 
         if (targetSlot >= 0)
@@ -767,8 +767,8 @@ public class InventoryUtils
         {
             Slot slot = container.slots.get(slotNum);
 
-            if ((isPlayerInv == false || fi.dy.masa.malilib.util.InventoryUtils.isRegularInventorySlot(slot.id, false)) &&
-                (allowHotbar || isHotbarSlot(slot) == false) &&
+            if ((!isPlayerInv || fi.dy.masa.malilib.util.InventoryUtils.isRegularInventorySlot(slot.id, false)) &&
+                (allowHotbar || !isHotbarSlot(slot)) &&
                 fi.dy.masa.malilib.util.InventoryUtils.areStacksEqualIgnoreDurability(slot.getStack(), stackReference))
             {
                 return slot.id;
@@ -879,7 +879,7 @@ public class InventoryUtils
                 return currentHotbarSlot;
             }
 
-            if ((stack.getItem() instanceof ToolItem) == false)
+            if (!(stack.getItem() instanceof ToolItem))
             {
                 nonTool = currentHotbarSlot;
             }
@@ -894,7 +894,7 @@ public class InventoryUtils
                 return hotbarSlot;
             }
 
-            if (nonTool == -1 && (stack.getItem() instanceof ToolItem) == false)
+            if (nonTool == -1 && !(stack.getItem() instanceof ToolItem))
             {
                 nonTool = hotbarSlot;
             }
@@ -916,7 +916,7 @@ public class InventoryUtils
 
             // Only accept regular inventory slots (no crafting, armor slots, or offhand)
             if (fi.dy.masa.malilib.util.InventoryUtils.isRegularInventorySlot(slot.id, false) &&
-                stackSlot.isItemEqual(stackReference) &&
+                ItemStack.areItemsEqual(stackSlot, stackReference) &&
                 stackSlot.getMaxDamage() - stackSlot.getDamage() >= minDurabilityLeft &&
                 hasSameIshEnchantments(stackReference, stackSlot))
             {
@@ -954,7 +954,7 @@ public class InventoryUtils
         for (Slot slot : container.slots)
         {
             // Don't consider armor and crafting slots
-            if (slot.id <= 8 || slot.hasStack() == false)
+            if (slot.id <= 8 || !slot.hasStack())
             {
                 continue;
             }
@@ -1024,7 +1024,7 @@ public class InventoryUtils
                     mc.interactionManager.clickSlot(container.syncId, slot2.id, 0, SlotActionType.PICKUP, player);
 
                     // If the items didn't all fit, return the rest
-                    if (player.getInventory().getMainHandStack().isEmpty() == false)
+                    if (!player.getInventory().getMainHandStack().isEmpty())
                     {
                         mc.interactionManager.clickSlot(container.syncId, slot1.id, 0, SlotActionType.PICKUP, player);
                     }
@@ -1036,7 +1036,7 @@ public class InventoryUtils
                     }
                 }
 
-                if (slot1.hasStack() == false)
+                if (!slot1.hasStack())
                 {
                     break;
                 }
@@ -1082,8 +1082,8 @@ public class InventoryUtils
             BlockState stateTargeted = world.getBlockState(pos);
             ItemStack stack = stateTargeted.getBlock().getPickStack(world, pos, stateTargeted);
 
-            if (stack.isEmpty() == false &&
-                fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stack, player.getMainHandStack()) == false)
+            if (!stack.isEmpty() &&
+                    !fi.dy.masa.malilib.util.InventoryUtils.areStacksEqual(stack, player.getMainHandStack()))
             {
                 ScreenHandler container = player.currentScreenHandler;
                 PlayerInventory inventory = player.getInventory();

@@ -55,7 +55,7 @@ public class ItemRestriction
         switch (this.type)
         {
             case BLACKLIST:
-                return this.blackList.contains(stack.getItem()) == false;
+                return !this.blackList.contains(stack.getItem());
 
             case WHITELIST:
                 return this.whiteList.contains(stack.getItem());

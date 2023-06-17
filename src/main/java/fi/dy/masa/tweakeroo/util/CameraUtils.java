@@ -29,13 +29,13 @@ public class CameraUtils
     public static boolean shouldPreventPlayerInputs()
     {
         return FeatureToggle.TWEAK_FREE_CAMERA.getBooleanValue() &&
-               Configs.Generic.FREE_CAMERA_PLAYER_INPUTS.getBooleanValue() == false;
+                !Configs.Generic.FREE_CAMERA_PLAYER_INPUTS.getBooleanValue();
     }
 
     public static boolean shouldPreventPlayerMovement()
     {
         return FeatureToggle.TWEAK_FREE_CAMERA.getBooleanValue() &&
-               Configs.Generic.FREE_CAMERA_PLAYER_MOVEMENT.getBooleanValue() == false;
+                !Configs.Generic.FREE_CAMERA_PLAYER_MOVEMENT.getBooleanValue();
     }
 
     public static float getCameraYaw()

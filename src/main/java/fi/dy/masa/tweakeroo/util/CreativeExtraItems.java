@@ -69,7 +69,7 @@ public class CreativeExtraItems
         {
             ItemStack stack = parseItemFromString(str);
 
-            if (stack.isEmpty() == false)
+            if (!stack.isEmpty())
             {
                 if (stack.hasNbt())
                 {

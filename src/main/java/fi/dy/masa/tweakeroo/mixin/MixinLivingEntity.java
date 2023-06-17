@@ -28,7 +28,7 @@ public abstract class MixinLivingEntity extends Entity
             target = "Lnet/minecraft/world/World;isClient:Z"))
     private boolean fixElytraLanding(World world)
     {
-        return world.isClient && (Configs.Fixes.ELYTRA_FIX.getBooleanValue() == false || ((Object) this instanceof ClientPlayerEntity) == false);
+        return world.isClient && (!Configs.Fixes.ELYTRA_FIX.getBooleanValue() || !((Object) this instanceof ClientPlayerEntity));
     }
 
     @Inject(method = "tickStatusEffects", at = @At(value = "INVOKE", ordinal = 0,

@@ -23,7 +23,7 @@ public abstract class MixinEntityRenderDispatcher
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private void onShouldRender(Entity entityIn, Frustum frustum, double camX, double camY, double camZ, CallbackInfoReturnable<Boolean> cir)
     {
-        if (Configs.Disable.DISABLE_ENTITY_RENDERING.getBooleanValue() && (entityIn instanceof PlayerEntity) == false)
+        if (Configs.Disable.DISABLE_ENTITY_RENDERING.getBooleanValue() && !(entityIn instanceof PlayerEntity))
         {
             cir.setReturnValue(false);
         }

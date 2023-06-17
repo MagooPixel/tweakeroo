@@ -14,7 +14,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.CommandBlockBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;
@@ -58,7 +60,7 @@ public class MiscUtils
     // name;blocks;biome;options;iconitem
     public static final Pattern PATTERN_WORLD_PRESET = Pattern.compile("^(?<name>[a-zA-Z0-9_/&*#!=()\\[\\]{} -]+);(?<blocks>[a-z0-9_:.*,-]+);(?<biome>[a-z0-9_:.-]+);(?<options>[a-z0-9_, ()=]*);(?<icon>[a-z0-9_:.-]+)$");
 
-    private static net.minecraft.text.Text[] previousSignText;
+    private static SignText previousSignText;
     private static String previousChatText = "";
     private static final Date DATE = new Date();
     private static double lastRealPitch;
@@ -73,7 +75,7 @@ public class MiscUtils
         Input input = player.input;
 
         if (input.jumping || input.sneaking ||
-            player.forwardSpeed != 0 || player.sidewaysSpeed != 0 || player.getAbilities().flying == false)
+            player.forwardSpeed != 0 || player.sidewaysSpeed != 0 || !player.getAbilities().flying)
         {
             return;
         }
@@ -139,7 +141,7 @@ public class MiscUtils
 
     public static void checkZoomStatus()
     {
-        if (zoomActive && isZoomActive() == false)
+        if (zoomActive && !isZoomActive())
         {
             onZoomDeactivated();
         }
@@ -259,33 +261,19 @@ public class MiscUtils
         return (newColor & 0x00FFFFFF) | ((int) (((newColor >>> 24) / 255.0) * ((colorOrig >>> 24) / 255.0) / 0.5 * 255) << 24);
     }
 
-    public static void copyTextFromSign(SignBlockEntity te)
+    public static void copyTextFromSign(SignBlockEntity te, boolean front)
     {
-        net.minecraft.text.Text[] text = ((ISignTextAccess) te).getText();
-        final int size = text.length;
-        previousSignText = new net.minecraft.text.Text[size];
-
-        for (int i = 0; i < size; ++i)
-        {
-            previousSignText[i] = text[i];
-        }
+        previousSignText = ((ISignTextAccess) te).getText(front);
     }
 
-    public static void applyPreviousTextToSign(SignBlockEntity te, @Nullable String[] guiLines)
+    public static void applyPreviousTextToSign(SignBlockEntity te, @Nullable AbstractSignEditScreen guiLines, boolean front)
     {
         if (previousSignText != null)
         {
-            final int size = previousSignText.length;
+            te.setText(previousSignText, front);
 
-            for (int i = 0; i < size; ++i)
-            {
-                net.minecraft.text.Text text = previousSignText[i];
-                te.setTextOnRow(i, text);
-
-                if (guiLines != null)
-                {
-                    guiLines[i] = text.getString();//Text.Serializer.toJson(text);
-                }
+            if (guiLines != null) {
+                ((IGuiEditSign) guiLines).applyText(previousSignText);
             }
         }
     }
@@ -331,7 +319,7 @@ public class MiscUtils
         Hand hand = Hand.MAIN_HAND;
         ActionResult actionResult = mc.interactionManager.interactEntityAtLocation(player, entity, new EntityHitResult(entity), hand);
 
-        if (actionResult.isAccepted() == false)
+        if (!actionResult.isAccepted())
         {
             actionResult = mc.interactionManager.interactEntity(player, entity, hand);
         }
@@ -359,9 +347,8 @@ public class MiscUtils
         entity.prevYaw = yaw;
         entity.prevPitch = pitch;
 
-        if (entity instanceof LivingEntity)
+        if (entity instanceof LivingEntity living)
         {
-            LivingEntity living = (LivingEntity) entity;
             living.headYaw = yaw;
             living.prevHeadYaw = yaw;
         }
@@ -400,7 +387,7 @@ public class MiscUtils
             double offset = Math.abs(MathHelper.wrapDegrees((float) (snappedPitch - realPitch)));
             if (GuiBase.isCtrlDown()) System.out.printf("real: %.2f, snapped: %.2f, offset: %.2f\n", realPitch, snappedPitch, offset);
 
-            if (Configs.Generic.SNAP_AIM_ONLY_CLOSE_TO_ANGLE.getBooleanValue() == false ||
+            if (!Configs.Generic.SNAP_AIM_ONLY_CLOSE_TO_ANGLE.getBooleanValue() ||
                 offset <= Configs.Generic.SNAP_AIM_THRESHOLD_PITCH.getDoubleValue())
             {
                 snappedPitch = MathHelper.clamp(MathHelper.wrapDegrees(snappedPitch), -limit, limit);
@@ -409,7 +396,7 @@ public class MiscUtils
                 {
                     String g = GuiBase.TXT_GREEN;
                     String r = GuiBase.TXT_RST;
-                    String str = String.format("%s%s%s (step %s%s%s)", g, String.valueOf(MathHelper.wrapDegrees(snappedPitch)), r, g, String.valueOf(step), r);
+                    String str = String.format("%s%s%s (step %s%s%s)", g, MathHelper.wrapDegrees(snappedPitch), r, g, step, r);
 
                     InfoUtils.printActionbarMessage("tweakeroo.message.snapped_to_pitch", str);
 
@@ -444,14 +431,14 @@ public class MiscUtils
             double step = Configs.Generic.SNAP_AIM_YAW_STEP.getDoubleValue();
             double snappedYaw = calculateSnappedAngle(realYaw, step);
 
-            if (Configs.Generic.SNAP_AIM_ONLY_CLOSE_TO_ANGLE.getBooleanValue() == false ||
+            if (!Configs.Generic.SNAP_AIM_ONLY_CLOSE_TO_ANGLE.getBooleanValue() ||
                 Math.abs(MathHelper.wrapDegrees((float) (snappedYaw - realYaw))) <= Configs.Generic.SNAP_AIM_THRESHOLD_YAW.getDoubleValue())
             {
                 if (Configs.Internal.SNAP_AIM_LAST_YAW.getDoubleValue() != snappedYaw)
                 {
                     String g = GuiBase.TXT_GREEN;
                     String r = GuiBase.TXT_RST;
-                    String str = String.format("%s%s%s (step %s%s%s)", g, String.valueOf(MathHelper.wrapDegrees(snappedYaw)), r, g, String.valueOf(step), r);
+                    String str = String.format("%s%s%s (step %s%s%s)", g, MathHelper.wrapDegrees(snappedYaw), r, g, step, r);
 
                     InfoUtils.printActionbarMessage("tweakeroo.message.snapped_to_yaw", str);
 
@@ -493,7 +480,7 @@ public class MiscUtils
 
         File dir = FileUtils.getConfigDirectory().toPath().resolve(Reference.MOD_ID).resolve("map_images").resolve(worldName).toFile();
 
-        if (dir.exists() == false && dir.mkdirs() == false)
+        if (!dir.exists() && !dir.mkdirs())
         {
             InfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR, "Failed to create directory: " + dir.getAbsolutePath());
             return true;

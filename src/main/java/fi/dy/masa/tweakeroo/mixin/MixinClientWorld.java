@@ -38,7 +38,7 @@ public abstract class MixinClientWorld extends World
     private void disableClientEntityTicking(Entity entity, CallbackInfo ci)
     {
         if (Configs.Disable.DISABLE_CLIENT_ENTITY_UPDATES.getBooleanValue() &&
-            (entity instanceof PlayerEntity) == false)
+                !(entity instanceof PlayerEntity))
         {
             ci.cancel();
         }

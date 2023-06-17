@@ -1,6 +1,9 @@
 package fi.dy.masa.tweakeroo.mixin;
 
 import java.util.Arrays;
+import java.util.Collections;
+
+import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,7 +16,6 @@ import net.minecraft.client.gui.screen.ingame.CommandBlockScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import fi.dy.masa.malilib.render.RenderUtils;
@@ -109,7 +111,7 @@ public abstract class MixinCommandBlockScreen extends AbstractCommandBlockScreen
         {
             String currentName = this.blockEntity.getCommandExecutor().getCustomName().getString();
 
-            if (currentName.equals(this.lastName) == false)
+            if (!currentName.equals(this.lastName))
             {
                 this.textFieldName.setText(currentName);
                 this.lastName = currentName;
@@ -131,19 +133,19 @@ public abstract class MixinCommandBlockScreen extends AbstractCommandBlockScreen
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float partialTicks)
     {
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        super.render(drawContext, mouseX, mouseY, partialTicks);
 
         if (this.textFieldName != null)
         {
-            this.textFieldName.render(matrixStack, mouseX, mouseY, partialTicks);
+            this.textFieldName.render(drawContext, mouseX, mouseY, partialTicks);
         }
 
         if (this.buttonUpdateExec != null && this.buttonUpdateExec.isHovered())
         {
             String hover = "tweakeroo.gui.button.misc.command_block.hover.update_execution";
-            RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList(StringUtils.translate(hover)), matrixStack);
+            RenderUtils.drawHoverText(mouseX, mouseY, Collections.singletonList(StringUtils.translate(hover)), drawContext);
         }
     }
 

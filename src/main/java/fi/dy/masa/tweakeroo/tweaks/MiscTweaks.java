@@ -197,7 +197,7 @@ public class MiscTweaks
 
             Collection<StatusEffectInstance> effects = player.getStatusEffects();
 
-            if (effects.isEmpty() == false)
+            if (!effects.isEmpty())
             {
                 int minDuration = -1;
                 int count = 0;
@@ -226,7 +226,7 @@ public class MiscTweaks
 
     public static boolean isEntityAllowedByAttackingRestriction(EntityType<?> type)
     {
-        if (MiscTweaks.ENTITY_TYPE_ATTACK_RESTRICTION.isAllowed(type) == false)
+        if (!MiscTweaks.ENTITY_TYPE_ATTACK_RESTRICTION.isAllowed(type))
         {
             MessageOutputType messageOutputType = (MessageOutputType) Configs.Generic.ENTITY_TYPE_ATTACK_RESTRICTION_WARN.getOptionListValue();
 
@@ -248,9 +248,9 @@ public class MiscTweaks
 
     private static boolean potionWarningShouldInclude(StatusEffectInstance effect)
     {
-        return effect.isAmbient() == false &&
+        return !effect.isAmbient() &&
                (effect.getEffectType().isBeneficial() ||
-               Configs.Generic.POTION_WARNING_BENEFICIAL_ONLY.getBooleanValue() == false) &&
+                       !Configs.Generic.POTION_WARNING_BENEFICIAL_ONLY.getBooleanValue()) &&
                effect.getDuration() <= Configs.Generic.POTION_WARNING_THRESHOLD.getIntegerValue() &&
                POTION_RESTRICTION.isAllowed(effect.getEffectType());
     }

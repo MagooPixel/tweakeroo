@@ -50,7 +50,7 @@ public abstract class MixinEntity
 
                 if (speed >= 1.0E-7D)
                 {
-                   motion = (speed > 1.0D ? motion.normalize() : motion).multiply((double) float_1);
+                   motion = (speed > 1.0D ? motion.normalize() : motion).multiply(float_1);
                    double xFactor = Math.sin(this.yaw * Math.PI / 180D);
                    double zFactor = Math.cos(this.yaw * Math.PI / 180D);
                    net.minecraft.util.math.Vec3d change = new net.minecraft.util.math.Vec3d(motion.x * zFactor - motion.z * xFactor, motion.y, motion.z * zFactor + motion.x * xFactor);
@@ -91,9 +91,9 @@ public abstract class MixinEntity
                 boolean snapAimLock = FeatureToggle.TWEAK_SNAP_AIM_LOCK.getBooleanValue();
 
                 // Not locked, or not snapping the yaw (ie. not in Yaw or Both modes)
-                boolean updateYaw = snapAimLock == false || mode == SnapAimMode.PITCH;
+                boolean updateYaw = !snapAimLock || mode == SnapAimMode.PITCH;
                 // Not locked, or not snapping the pitch (ie. not in Pitch or Both modes)
-                boolean updatePitch = snapAimLock == false || mode == SnapAimMode.YAW;
+                boolean updatePitch = !snapAimLock || mode == SnapAimMode.YAW;
 
                 this.updateCustomPlayerRotations(yawChange, pitchChange, updateYaw, updatePitch, pitchLimit);
 

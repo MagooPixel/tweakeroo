@@ -103,7 +103,7 @@ public abstract class MixinClientPlayerInteractionManager
             ci.cancel();
         }
         else if (FeatureToggle.TWEAK_ENTITY_TYPE_ATTACK_RESTRICTION.getBooleanValue() &&
-                 MiscTweaks.isEntityAllowedByAttackingRestriction(target.getType()) == false)
+                !MiscTweaks.isEntityAllowedByAttackingRestriction(target.getType()))
         {
             ci.cancel();
         }
@@ -136,7 +136,7 @@ public abstract class MixinClientPlayerInteractionManager
     private void handleBreakingRestriction1(BlockPos pos, Direction side, CallbackInfoReturnable<Boolean> cir)
     {
         if (CameraUtils.shouldPreventPlayerInputs() ||
-            PlacementTweaks.isPositionAllowedByBreakingRestriction(pos, side) == false)
+                !PlacementTweaks.isPositionAllowedByBreakingRestriction(pos, side))
         {
             cir.setReturnValue(false);
         }
@@ -150,7 +150,7 @@ public abstract class MixinClientPlayerInteractionManager
     private void handleBreakingRestriction2(BlockPos pos, Direction side, CallbackInfoReturnable<Boolean> cir)
     {
         if (CameraUtils.shouldPreventPlayerInputs() ||
-            PlacementTweaks.isPositionAllowedByBreakingRestriction(pos, side) == false)
+                !PlacementTweaks.isPositionAllowedByBreakingRestriction(pos, side))
         {
             cir.setReturnValue(true);
         }
